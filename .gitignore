@@ -1,0 +1,15 @@
+# Ignore build and installation artifacts
+build/
+install/
+
+# Ignore ROS 2 logs
+log/
+
+# Ignore generated files
+*.pyc
+*.pyo
+__pycache__/
+
+# Ignore editor-specific files
+.vscode/
+.idea/
