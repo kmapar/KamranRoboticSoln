@@ -16,38 +16,41 @@ class ServiceServer(Node):
     def __init__(self):
         super().__init__('service_server')
         self.service = self.create_service(CustomService, '/sensor_data',self.service_callback)
+        self.get_logger().info('Service server initialized.')
 
-    # Service request
     def service_callback(self, request, response):
-        self.get_logger().info('service_callback is called')
 
-        # Fixed number of samples
+        # Due to connection issues with service client and sensor.py...
+        # num_of_samples has not been optimized
         num_of_samples = 10
+    
+        # Empty request from service client
+        if request is not None:
+            num_of_samples = request.num_samples
 
-        # Client specifies number of samples from the request 
-        #num_of_samples = request.num_samples
-
-        print("Calling read_data()")
+        # Read data from sensor
         sensor_data = self.read_data(num_of_samples)
 
+        # Filter sensor data
         filtered_data = self.filter(sensor_data)
 
+        # Fill response message with filtered data
         response.filtered_data = filtered_data
 
-        self.get_logger().info('Received request: %s' % request.some_field) # Placeholder
+        self.get_logger().info('Service client requested data')
         self.get_logger().info('Send response: %s' % response.filtered_data)
 
         return response
     
     # Read data
     def read_data(self, num_of_samples):
-        print("read_data function is ran")
+    
         # Create a TCP/IP socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
         try: 
             # Connect the socket to the port where the server is listening
-            server_address = ('127.0.0.3', 10000)
+            server_address = ('127.0.0.1', 10000)
 
             print('connecting to {} port {}'.format(*server_address))
             sock.connect(server_address)
@@ -71,9 +74,8 @@ class ServiceServer(Node):
             self.get_logger().info('Closing socket')
             sock.close()
 
-    # Median filter of size 'window_size'
+    # Median filter onto sensor data
     def filter(self, sensor_data):
-        print("filter function running")
         window_size = 3
 
         filtered_data = np.zeros_like(sensor_data)
@@ -93,8 +95,6 @@ class ServiceServer(Node):
                 median = np.median(neighborhood)
                 filtered_data[i,j] = median
 
-        # Testing purposes
-        print('Filtered data:', filtered_data) 
         return filtered_data
 
     
@@ -103,9 +103,7 @@ def main (args = None):
     
     server = ServiceServer()
     
-    print("before spin")
     rclpy.spin(server)
-    print("after spin")
 
     # Clean up
     server.destroy_node()

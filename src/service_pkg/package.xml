@@ -3,9 +3,9 @@
 <package format="3">
   <name>service_pkg</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="kmapar@todo.todo">kmapar</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Package for custom service</description>
+  <maintainer email="kmapar@ucsd.edu">kmapar</maintainer>
+  <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
